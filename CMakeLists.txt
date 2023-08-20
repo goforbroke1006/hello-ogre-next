@@ -7,8 +7,8 @@ add_executable(${PROJECT_NAME} main.cpp)
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
     message(STATUS "DEBUG MODE")
-#    add_compile_definitions(_DEBUG=1)
-#    add_compile_definitions(OGRE_DEBUG_MODE=1)
+    #    add_compile_definitions(_DEBUG=1)
+    #    add_compile_definitions(OGRE_DEBUG_MODE=1)
 endif ()
 
 if (WIN32)
@@ -38,3 +38,4 @@ target_link_libraries(${PROJECT_NAME}
 #configure_file(${CMAKE_SOURCE_DIR}/ogre.cfg ${CMAKE_CURRENT_BINARY_DIR}/ogre.cfg COPYONLY)
 configure_file(${CMAKE_SOURCE_DIR}/plugins.cfg ${CMAKE_CURRENT_BINARY_DIR}/plugins.cfg COPYONLY)
 configure_file(${CMAKE_SOURCE_DIR}/resources.cfg ${CMAKE_CURRENT_BINARY_DIR}/resources.cfg COPYONLY)
+file(COPY ./Media DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
