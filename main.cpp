@@ -10,6 +10,7 @@
 #include <OgrePlatformInformation.h>
 
 #include "WindowEventListener.h"
+#include "Hlms.h"
 #include "utils.h"
 
 #if OGRE_PLATFORM != OGRE_PLATFORM_WIN32 && OGRE_PLATFORM != OGRE_PLATFORM_LINUX
@@ -32,7 +33,8 @@ int main(int argc, char **argv) {
 #endif
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32 || OGRE_PLATFORM == OGRE_PLATFORM_LINUX
-    auto *gOgreRoot = OGRE_NEW Ogre::Root();
+    auto *gOgreRoot = OGRE_NEW Ogre::Root("plugins_d.cfg", "ogre.cfg", "Ogre.log");
+
 
     if (!gOgreRoot->restoreConfig())
         if (!gOgreRoot->showConfigDialog())
@@ -41,8 +43,48 @@ int main(int argc, char **argv) {
     Ogre::Window *gOgreWindow = gOgreRoot->initialise(true, "Hello Ogre next");
 
 
-//    const size_t numThreads = std::max<uint32_t>(1, Ogre::PlatformInformation::getNumLogicalCores());
-    const size_t numThreads = 1u;
+
+    {
+        // Loading resources
+        Ogre::ConfigFile cf;
+        cf.load("resources_d.cfg");
+//        cf.load("resources2.cfg");
+        Ogre::ConfigFile::SectionIterator it = cf.getSectionIterator();
+        Ogre::String section, type, arch;
+        while (it.hasMoreElements()) {
+            section = it.peekNextKey();
+            Ogre::ConfigFile::SettingsMultiMap *settings = it.getNext();
+            Ogre::ConfigFile::SettingsMultiMap::iterator i;
+            for (i = settings->begin(); i != settings->end(); ++i) {
+                type = i->first;
+                arch = i->second;
+                if (type == "DoNotUseAsResource")
+                    continue;
+                Ogre::ResourceGroupManager::getSingleton().addResourceLocation(arch, type, section);
+            }
+        }
+
+
+//        auto &resourceGroupManager = Ogre::ResourceGroupManager::getSingleton();
+//        resourceGroupManager.addResourceLocation("./Media/Hlms/Common/Any", "FileSystem", "General");
+//        resourceGroupManager.addResourceLocation("./Media/Hlms/Common/GLSL", "FileSystem", "General");
+//        resourceGroupManager.addResourceLocation("./Media/Hlms/Common/HLSL", "FileSystem", "General");
+//        resourceGroupManager.addResourceLocation("./Media/Hlms/Common/Metal", "FileSystem", "General");
+//
+//        resourceGroupManager.addResourceLocation("./Media/models", "FileSystem", "Models");
+////        resourceGroupManager.addResourceLocation("./Media/materials/programs", "FileSystem", "Programs");
+//        resourceGroupManager.addResourceLocation("./Media/materials/scripts", "FileSystem", "Models");
+//        resourceGroupManager.addResourceLocation("./Media/materials/textures", "FileSystem", "Models");
+
+        // Initialise resources groups
+        Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups(true);
+    }
+
+    registerHlms();
+
+
+    const size_t numThreads = std::max<uint32_t>(1, Ogre::PlatformInformation::getNumLogicalCores());
+//    const size_t numThreads = 1u;
     auto *gSceneManager = gOgreRoot
             ->createSceneManager(Ogre::ST_GENERIC, numThreads, "SM");
 
@@ -53,12 +95,6 @@ int main(int argc, char **argv) {
     camera->setFarClipDistance(1000.0f);
     camera->setAutoAspectRatio(true);
 
-//    Ogre::Light *light = gSceneManager->createLight();
-//    Ogre::SceneNode *lightNode = gSceneManager->getRootSceneNode()->createChildSceneNode();
-//    lightNode->attachObject(light);
-//    light->setPowerScale(Ogre::Math::PI); //Since we don't do HDR, counter the PBS' division by PI
-//    light->setType(Ogre::Light::LT_DIRECTIONAL);
-//    light->setDirection(Ogre::Vector3(-1, -1, -1).normalisedCopy());
 
     Ogre::CompositorManager2 *compositorManager = gOgreRoot->getCompositorManager2();
     const Ogre::String workspaceName("Demo Workspace");
@@ -66,6 +102,24 @@ int main(int argc, char **argv) {
     compositorManager->createBasicWorkspaceDef(workspaceName, backgroundColour, Ogre::IdString());
     compositorManager->addWorkspace(gSceneManager, gOgreWindow->getTexture(), camera, workspaceName, true);
 
+//    Ogre::ResourceGroupManager &resourceGroupManager = Ogre::ResourceGroupManager::getSingleton();
+//    resourceGroupManager.addResourceLocation("Media/models", "FileSystem", "Models");
+//    resourceGroupManager.addResourceLocation("Media/materials/textures", "FileSystem", "Textures");
+
+    Ogre::Item *item = gSceneManager
+            ->createItem("ogrehead.mesh",
+                         Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME,
+                         Ogre::SCENE_DYNAMIC);
+    auto *mSceneNode = gSceneManager->getRootSceneNode(Ogre::SCENE_DYNAMIC)
+            ->createChildSceneNode(Ogre::SCENE_DYNAMIC);
+    mSceneNode->attachObject(item);
+
+//    Ogre::Light *light = gSceneManager->createLight();
+//    Ogre::SceneNode *lightNode = gSceneManager->getRootSceneNode()->createChildSceneNode(Ogre::SCENE_DYNAMIC);
+//    lightNode->attachObject(light);
+//    light->setPowerScale(Ogre::Math::PI); //Since we don't do HDR, counter the PBS' division by PI
+//    light->setType(Ogre::Light::LT_DIRECTIONAL);
+//    light->setDirection(Ogre::Vector3(-1, -1, -1).normalisedCopy());
 
     WindowEventListener gWindowEventListener;
     Ogre::WindowEventUtilities::addWindowEventListener(gOgreWindow, &gWindowEventListener);
