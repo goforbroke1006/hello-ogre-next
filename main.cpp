@@ -8,7 +8,6 @@
 #include <OgreMesh.h>
 #include <OgreItem.h>
 #include <OgrePlatformInformation.h>
-#include <OGRE/Overlay/OgreOverlaySystem.h>
 
 #include "WindowEventListener.h"
 #include "utils.h"
@@ -35,10 +34,12 @@ int main(int argc, char **argv) {
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32 || OGRE_PLATFORM == OGRE_PLATFORM_LINUX
     auto *gOgreRoot = OGRE_NEW Ogre::Root();
 
-    if (!gOgreRoot->showConfigDialog())
-        return -1;
+    if (!gOgreRoot->restoreConfig())
+        if (!gOgreRoot->showConfigDialog())
+            return EXIT_FAILURE;
 
     Ogre::Window *gOgreWindow = gOgreRoot->initialise(true, "Hello Ogre next");
+
 
 //    const size_t numThreads = std::max<uint32_t>(1, Ogre::PlatformInformation::getNumLogicalCores());
     const size_t numThreads = 1u;
@@ -52,12 +53,6 @@ int main(int argc, char **argv) {
     camera->setFarClipDistance(1000.0f);
     camera->setAutoAspectRatio(true);
 
-    Ogre::CompositorManager2 *compositorManager = gOgreRoot->getCompositorManager2();
-    const Ogre::String workspaceName("Demo Workspace");
-    const Ogre::ColourValue backgroundColour(0.2f, 0.4f, 0.6f);
-    compositorManager->createBasicWorkspaceDef(workspaceName, backgroundColour, Ogre::IdString());
-    compositorManager->addWorkspace(gSceneManager, gOgreWindow->getTexture(), camera, workspaceName, true);
-
 //    Ogre::Light *light = gSceneManager->createLight();
 //    Ogre::SceneNode *lightNode = gSceneManager->getRootSceneNode()->createChildSceneNode();
 //    lightNode->attachObject(light);
@@ -65,22 +60,30 @@ int main(int argc, char **argv) {
 //    light->setType(Ogre::Light::LT_DIRECTIONAL);
 //    light->setDirection(Ogre::Vector3(-1, -1, -1).normalisedCopy());
 
-    WindowEventListener g_myWindowEventListener;
-    Ogre::WindowEventUtilities::addWindowEventListener(gOgreWindow, &g_myWindowEventListener);
+    Ogre::CompositorManager2 *compositorManager = gOgreRoot->getCompositorManager2();
+    const Ogre::String workspaceName("Demo Workspace");
+    const Ogre::ColourValue backgroundColour(0.2f, 0.4f, 0.6f);
+    compositorManager->createBasicWorkspaceDef(workspaceName, backgroundColour, Ogre::IdString());
+    compositorManager->addWorkspace(gSceneManager, gOgreWindow->getTexture(), camera, workspaceName, true);
+
+
+    WindowEventListener gWindowEventListener;
+    Ogre::WindowEventUtilities::addWindowEventListener(gOgreWindow, &gWindowEventListener);
 
     bool bQuit = false;
     while (!bQuit) {
         Ogre::WindowEventUtilities::messagePump();
 
-        bQuit |= g_myWindowEventListener.shouldQuit();
+        bQuit |= gWindowEventListener.shouldQuit();
 
         if (gOgreWindow->isVisible() && !bQuit)
             bQuit |= !gOgreRoot->renderOneFrame();
     }
 
-    Ogre::WindowEventUtilities::removeWindowEventListener(gOgreWindow, &g_myWindowEventListener);
+    Ogre::WindowEventUtilities::removeWindowEventListener(gOgreWindow, &gWindowEventListener);
 
-    OGRE_DELETE (gOgreRoot);
+    OGRE_DELETE gOgreRoot;
+    gOgreRoot = nullptr;
 
     return EXIT_SUCCESS;
 }
