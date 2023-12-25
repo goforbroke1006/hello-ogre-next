@@ -8,6 +8,10 @@
 #include <OgreMesh.h>
 #include <OgreItem.h>
 #include <OgrePlatformInformation.h>
+#include <OGRE/Compositor/OgreCompositorWorkspace.h>
+#include <OGRE/Overlay/OgreOverlay.h>
+#include <OGRE/Overlay/OgreOverlaySystem.h>
+#include <OGRE/Overlay/OgreOverlayManager.h>
 
 #include "WindowEventListener.h"
 #include "Hlms.h"
@@ -35,13 +39,13 @@ int main(int argc, char **argv) {
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32 || OGRE_PLATFORM == OGRE_PLATFORM_LINUX
     auto *gOgreRoot = OGRE_NEW Ogre::Root("plugins_d.cfg", "ogre.cfg", "Ogre.log");
 
-
     if (!gOgreRoot->restoreConfig())
         if (!gOgreRoot->showConfigDialog())
             return EXIT_FAILURE;
 
-    Ogre::Window *gOgreWindow = gOgreRoot->initialise(true, "Hello Ogre next");
+    gOgreRoot->initialise(false);
 
+    Ogre::Window *gOgreWindow = gOgreRoot->initialise(true, "Hello Ogre next");
 
 
     {
@@ -82,11 +86,19 @@ int main(int argc, char **argv) {
 
     registerHlms();
 
+    auto *mOverlaySystem = OGRE_NEW Ogre::v1::OverlaySystem();
 
-    const size_t numThreads = std::max<uint32_t>(1, Ogre::PlatformInformation::getNumLogicalCores());
-//    const size_t numThreads = 1u;
-    auto *gSceneManager = gOgreRoot
-            ->createSceneManager(Ogre::ST_GENERIC, numThreads, "SM");
+//    const size_t numThreads = std::max<uint32_t>(1, Ogre::PlatformInformation::getNumLogicalCores());
+    const size_t numThreads = 1u;
+    auto *gSceneManager = gOgreRoot->createSceneManager(Ogre::ST_GENERIC, numThreads, "SM");
+    gSceneManager->addRenderQueueListener(mOverlaySystem);
+    gSceneManager->getRenderQueue()->setSortRenderQueue(
+            Ogre::v1::OverlayManager::getSingleton().mDefaultRenderQueueId,
+            Ogre::RenderQueue::StableSort);
+
+    //Set sane defaults for proper shadow mapping
+    gSceneManager->setShadowDirectionalLightExtrusionDistance(500.0f);
+    gSceneManager->setShadowFarDistance(500.0f);
 
     Ogre::Camera *camera = gSceneManager->createCamera("Main Camera");
     camera->setPosition(1000, 1000, 1000);
@@ -100,14 +112,12 @@ int main(int argc, char **argv) {
     const Ogre::String workspaceName("Demo Workspace");
     const Ogre::ColourValue backgroundColour(0.2f, 0.4f, 0.6f);
     compositorManager->createBasicWorkspaceDef(workspaceName, backgroundColour, Ogre::IdString());
-    compositorManager->addWorkspace(gSceneManager, gOgreWindow->getTexture(), camera, workspaceName, true);
-
-//    Ogre::ResourceGroupManager &resourceGroupManager = Ogre::ResourceGroupManager::getSingleton();
-//    resourceGroupManager.addResourceLocation("Media/models", "FileSystem", "Models");
-//    resourceGroupManager.addResourceLocation("Media/materials/textures", "FileSystem", "Textures");
+    auto *mWorkspace = compositorManager->addWorkspace(gSceneManager, gOgreWindow->getTexture(), camera, workspaceName,
+                                                       true);
+    gSceneManager = mWorkspace->getSceneManager();
 
     Ogre::Item *item = gSceneManager
-            ->createItem("ogrehead.mesh",
+            ->createItem("ogrehead-2.mesh",
                          Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME,
                          Ogre::SCENE_DYNAMIC);
     auto *mSceneNode = gSceneManager->getRootSceneNode(Ogre::SCENE_DYNAMIC)
