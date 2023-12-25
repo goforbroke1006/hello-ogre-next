@@ -92,7 +92,7 @@ Ogre::SceneNode *ogreNodeFromItem(Ogre::SceneManager *const sceneManager, Ogre::
 }
 
 int entryPoint() {
-    auto *gOgreRoot = OGRE_NEW Ogre::Root("plugins.cfg", "resources2.cfg", "ogre.cfg", "App Name");
+    auto *gOgreRoot = OGRE_NEW Ogre::Root();
 
     Ogre::RenderSystem *renderSystem = gOgreRoot->getRenderSystemByName("OpenGL 3+ Rendering Subsystem");
     if (!(renderSystem)) {
@@ -136,7 +136,7 @@ int entryPoint() {
 
     //
 
-    Ogre::ConfigFile cf;
+    /*Ogre::ConfigFile cf;
     cf.load("resources.cfg");
 
     Ogre::ConfigFile::SectionIterator seci = cf.getSectionIterator();
@@ -166,7 +166,7 @@ int entryPoint() {
     }
 
     Ogre::Item *item = ogreLoadMesh(gSceneManager, barrelMeshPath);
-    Ogre::SceneNode *pBarrelNode = ogreNodeFromItem(gSceneManager, item);
+    Ogre::SceneNode *pBarrelNode = ogreNodeFromItem(gSceneManager, item);*/
 
     MyWindowEventListener g_myWindowEventListener;
     Ogre::WindowEventUtilities::addWindowEventListener(gOgreWindow, &g_myWindowEventListener);
@@ -181,8 +181,8 @@ int entryPoint() {
         }
     }
 
-    OGRE_DELETE pBarrelNode;
-    OGRE_DELETE item;
+//    OGRE_DELETE pBarrelNode;
+//    OGRE_DELETE item;
 
     Ogre::WindowEventUtilities::removeWindowEventListener(gOgreWindow, &g_myWindowEventListener);
     OGRE_DELETE (gOgreRoot);

@@ -1,2 +1,5 @@
 /.idea/
 /cmake-build-debug/
+
+./third_party/ogre-next
+./third_party/ogre-next-deps
