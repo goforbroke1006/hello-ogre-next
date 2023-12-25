@@ -11,87 +11,28 @@
 #include <OgreItem.h>
 #include <OgrePlatformInformation.h>
 
-int entryPoint();
+#include "WindowEventListener.h"
+
+#if OGRE_PLATFORM != OGRE_PLATFORM_WIN32 && OGRE_PLATFORM != OGRE_PLATFORM_LINUX
+int main(int argc, char **argv) {
+    std::cerr << "Unsupported platform: " << OGRE_PLATFORM << std::endl;
+    return EXIT_FAILURE;
+}
+#endif
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
 
 #define WIN32_LEAN_AND_MEAN
 #include "windows.h"
 INT WINAPI WinMain( HINSTANCE hInst, HINSTANCE, LPSTR strCmdLine, INT ) {
-    return entryPoint();
-}
 
 #elif OGRE_PLATFORM == OGRE_PLATFORM_LINUX
 
 int main(int argc, char **argv) {
-    return entryPoint();
-}
-
-#else
-
-int main(int argc, char **argv) {
-    std::cerr << "Unsupported platform" << std::endl;
-    return EXIT_FAILURE;
-}
 
 #endif
 
-static bool g_ogre_window_should_quit = false;
-
-class MyWindowEventListener : public Ogre::WindowEventListener {
-public:
-    void windowClosed(Ogre::Window *window) override {
-        printf("Window closed!\n");
-        g_ogre_window_should_quit = true;
-    }
-};
-
-// V2 mesh loading
-Ogre::Item *ogreLoadMesh(Ogre::SceneManager *const sceneManager, const std::string &filepath) {
-//    Ogre::MeshPtr v2Mesh = Ogre::MeshManager::getSingleton().load(
-//            name, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-//    Ogre::Item *item = sceneManager->createItem(
-//            name, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME, Ogre::SCENE_DYNAMIC);
-//    return item;
-
-    bool halfPosition = true;
-    bool halfUVs = true;
-    bool useQtangents = true;
-
-    Ogre::v1::MeshPtr v1Mesh = Ogre::v1::MeshManager::getSingleton().load(
-            filepath, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME,
-            Ogre::v1::HardwareBuffer::HBU_STATIC, Ogre::v1::HardwareBuffer::HBU_STATIC);
-    //Create a v2 mesh to import to, with a different name.
-    Ogre::MeshPtr v2Mesh = Ogre::MeshManager::getSingleton().createByImportingV1(
-            filepath + " Imported", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-            v1Mesh.get(), halfPosition, halfUVs, useQtangents);
-    v2Mesh->load();
-    v1Mesh->unload();
-
-    Ogre::Item *item = sceneManager->createItem(
-            filepath + " Imported", Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME, Ogre::SCENE_DYNAMIC);
-    return item;
-}
-
-Ogre::SceneNode *ogreNodeFromItem(Ogre::SceneManager *const sceneManager, Ogre::Item *meshHandle) {
-//    Ogre::SceneNode *newSceneNode = nullptr;
-//    Ogre::SceneNode *rootSceneNode = sceneManager->getRootSceneNode();
-//    if (rootSceneNode) {
-//        Ogre::SceneNode *sceneNode = ((Ogre::SceneNode *) rootSceneNode->createChild());
-//        if (sceneNode) {
-//            sceneNode->attachObject(meshHandle);
-//            newSceneNode = sceneNode;
-//        }
-//    }
-//    return newSceneNode;
-
-    Ogre::SceneNode *sceneNode = sceneManager->getRootSceneNode(Ogre::SCENE_DYNAMIC)->
-            createChildSceneNode(Ogre::SCENE_DYNAMIC);
-    sceneNode->attachObject(meshHandle);
-    sceneNode->scale(0.1f, 0.1f, 0.1f);
-}
-
-int entryPoint() {
+#if OGRE_PLATFORM == OGRE_PLATFORM_WIN32 || OGRE_PLATFORM == OGRE_PLATFORM_LINUX
     auto *gOgreRoot = OGRE_NEW Ogre::Root();
 
     Ogre::RenderSystem *renderSystem = gOgreRoot->getRenderSystemByName("OpenGL 3+ Rendering Subsystem");
@@ -168,12 +109,12 @@ int entryPoint() {
     Ogre::Item *item = ogreLoadMesh(gSceneManager, barrelMeshPath);
     Ogre::SceneNode *pBarrelNode = ogreNodeFromItem(gSceneManager, item);*/
 
-    MyWindowEventListener g_myWindowEventListener;
+    WindowEventListener g_myWindowEventListener;
     Ogre::WindowEventUtilities::addWindowEventListener(gOgreWindow, &g_myWindowEventListener);
 
     while (true) {
         Ogre::WindowEventUtilities::messagePump();
-        if (g_ogre_window_should_quit)
+        if (g_myWindowEventListener.shouldQuit())
             break;
 
         if (!(gOgreRoot->renderOneFrame())) {
@@ -186,7 +127,8 @@ int entryPoint() {
 
     Ogre::WindowEventUtilities::removeWindowEventListener(gOgreWindow, &g_myWindowEventListener);
     OGRE_DELETE (gOgreRoot);
-    gOgreRoot = nullptr;
 
     return EXIT_SUCCESS;
 }
+
+#endif

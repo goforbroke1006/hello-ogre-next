@@ -9,7 +9,9 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_compile_definitions(OGRE_DEBUG_MODE)
 endif (CMAKE_BUILD_TYPE STREQUAL "Debug")
 
-add_executable(${PROJECT_NAME} main.cpp)
+add_executable(${PROJECT_NAME} main.cpp
+        WindowEventListener.h
+        utils.h)
 
 if (WIN32)
     message(STATUS "TODO: add instructions to support Windows")
