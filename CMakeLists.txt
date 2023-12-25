@@ -45,7 +45,6 @@ target_link_libraries(${PROJECT_NAME}
         ${OGRE_HlmsUnlit_LIBRARIES})
 
 configure_file(${CMAKE_SOURCE_DIR}/third_party/ogre-next/build/Debug/bin/plugins_d.cfg ${CMAKE_CURRENT_BINARY_DIR}/plugins_d.cfg COPYONLY)
-configure_file(${CMAKE_SOURCE_DIR}/third_party/ogre-next/build/Debug/bin/resources2.cfg ${CMAKE_CURRENT_BINARY_DIR}/resources2.cfg COPYONLY)
 configure_file(${CMAKE_SOURCE_DIR}/resources_d.cfg ${CMAKE_CURRENT_BINARY_DIR}/resources_d.cfg COPYONLY)
 
 file(COPY ./Media DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
