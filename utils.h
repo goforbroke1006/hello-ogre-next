@@ -56,6 +56,8 @@ Ogre::SceneNode *ogreNodeFromItem(Ogre::SceneManager *const sceneManager, Ogre::
             createChildSceneNode(Ogre::SCENE_DYNAMIC);
     sceneNode->attachObject(meshHandle);
     sceneNode->scale(0.1f, 0.1f, 0.1f);
+
+    return sceneNode;
 }
 
 #endif //HELLO_OGRE_NEXT_UTILS_H
