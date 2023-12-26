@@ -3,7 +3,7 @@
 ### Setup
 
 ```shell
-bash ./install-ogre-next.sh
+bash ./setup.sh
 ```
 
 ### Useful links
