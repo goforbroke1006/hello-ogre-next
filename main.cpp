@@ -6,7 +6,7 @@
 #include <OgreMeshManager2.h>
 #include <OgreLight.h>
 #include <OgreMesh.h>
-#include <OgreItem.h>
+#include <OGRE/OgreItem.h>
 #include <OgrePlatformInformation.h>
 #include <OGRE/Compositor/OgreCompositorWorkspace.h>
 #include <OGRE/Overlay/OgreOverlay.h>
@@ -16,6 +16,42 @@
 #include "WindowEventListener.h"
 #include "Hlms.h"
 #include "utils.h"
+
+void loadResources(const std::string &filepath) {
+    // Loading resources
+    Ogre::ConfigFile cf;
+    cf.load(filepath);
+
+    Ogre::ConfigFile::SectionIterator it = cf.getSectionIterator();
+    Ogre::String section, type, arch;
+    while (it.hasMoreElements()) {
+        section = it.peekNextKey();
+        Ogre::ConfigFile::SettingsMultiMap *settings = it.getNext();
+        Ogre::ConfigFile::SettingsMultiMap::iterator i;
+        for (i = settings->begin(); i != settings->end(); ++i) {
+            type = i->first;
+            arch = i->second;
+            if (type == "DoNotUseAsResource")
+                continue;
+            Ogre::ResourceGroupManager::getSingleton().addResourceLocation(arch, type, section);
+        }
+    }
+
+
+//        auto &resourceGroupManager = Ogre::ResourceGroupManager::getSingleton();
+//        resourceGroupManager.addResourceLocation("./Media/Hlms/Common/Any", "FileSystem", "General");
+//        resourceGroupManager.addResourceLocation("./Media/Hlms/Common/GLSL", "FileSystem", "General");
+//        resourceGroupManager.addResourceLocation("./Media/Hlms/Common/HLSL", "FileSystem", "General");
+//        resourceGroupManager.addResourceLocation("./Media/Hlms/Common/Metal", "FileSystem", "General");
+//
+//        resourceGroupManager.addResourceLocation("./Media/models", "FileSystem", "Models");
+////        resourceGroupManager.addResourceLocation("./Media/materials/programs", "FileSystem", "Programs");
+//        resourceGroupManager.addResourceLocation("./Media/materials/scripts", "FileSystem", "Models");
+//        resourceGroupManager.addResourceLocation("./Media/materials/textures", "FileSystem", "Models");
+
+    // Initialise resources groups
+    Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups(true);
+}
 
 #if OGRE_PLATFORM != OGRE_PLATFORM_WIN32 && OGRE_PLATFORM != OGRE_PLATFORM_LINUX
 int main(int argc, char **argv) {
@@ -37,102 +73,61 @@ int main(int argc, char **argv) {
 #endif
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32 || OGRE_PLATFORM == OGRE_PLATFORM_LINUX
-    auto *gOgreRoot = OGRE_NEW Ogre::Root("plugins_d.cfg", "ogre.cfg", "Ogre.log");
+    auto *root = OGRE_NEW Ogre::Root("plugins_d.cfg", "ogre.cfg", "Ogre.log");
 
-    if (!gOgreRoot->restoreConfig())
-        if (!gOgreRoot->showConfigDialog())
-            return EXIT_FAILURE;
+    if (!root->restoreConfig() && !root->showConfigDialog())
+        return EXIT_FAILURE;
 
-    gOgreRoot->initialise(false);
-
-    Ogre::Window *gOgreWindow = gOgreRoot->initialise(true, "Hello Ogre next");
-
-
-    {
-        // Loading resources
-        Ogre::ConfigFile cf;
-        cf.load("resources_d.cfg");
-//        cf.load("resources2.cfg");
-        Ogre::ConfigFile::SectionIterator it = cf.getSectionIterator();
-        Ogre::String section, type, arch;
-        while (it.hasMoreElements()) {
-            section = it.peekNextKey();
-            Ogre::ConfigFile::SettingsMultiMap *settings = it.getNext();
-            Ogre::ConfigFile::SettingsMultiMap::iterator i;
-            for (i = settings->begin(); i != settings->end(); ++i) {
-                type = i->first;
-                arch = i->second;
-                if (type == "DoNotUseAsResource")
-                    continue;
-                Ogre::ResourceGroupManager::getSingleton().addResourceLocation(arch, type, section);
-            }
-        }
-
-
-//        auto &resourceGroupManager = Ogre::ResourceGroupManager::getSingleton();
-//        resourceGroupManager.addResourceLocation("./Media/Hlms/Common/Any", "FileSystem", "General");
-//        resourceGroupManager.addResourceLocation("./Media/Hlms/Common/GLSL", "FileSystem", "General");
-//        resourceGroupManager.addResourceLocation("./Media/Hlms/Common/HLSL", "FileSystem", "General");
-//        resourceGroupManager.addResourceLocation("./Media/Hlms/Common/Metal", "FileSystem", "General");
-//
-//        resourceGroupManager.addResourceLocation("./Media/models", "FileSystem", "Models");
-////        resourceGroupManager.addResourceLocation("./Media/materials/programs", "FileSystem", "Programs");
-//        resourceGroupManager.addResourceLocation("./Media/materials/scripts", "FileSystem", "Models");
-//        resourceGroupManager.addResourceLocation("./Media/materials/textures", "FileSystem", "Models");
-
-        // Initialise resources groups
-        Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups(true);
-    }
+    root->getRenderSystem()->setConfigOption("sRGB Gamma Conversion", "Yes");
+    auto *window = root->initialise(true, "Hello Ogre-next");
 
     registerHlms();
 
-    auto *mOverlaySystem = OGRE_NEW Ogre::v1::OverlaySystem();
+//    loadResources("resources2.cfg");
+    loadResources("resources_d.cfg");
 
-//    const size_t numThreads = std::max<uint32_t>(1, Ogre::PlatformInformation::getNumLogicalCores());
+    //const size_t numThreads = std::max<uint32_t>(1, Ogre::PlatformInformation::getNumLogicalCores());
     const size_t numThreads = 1u;
-    auto *gSceneManager = gOgreRoot->createSceneManager(Ogre::ST_GENERIC, numThreads, "SM");
-    gSceneManager->addRenderQueueListener(mOverlaySystem);
-    gSceneManager->getRenderQueue()->setSortRenderQueue(
-            Ogre::v1::OverlayManager::getSingleton().mDefaultRenderQueueId,
-            Ogre::RenderQueue::StableSort);
+    auto *sceneManager = root->createSceneManager(Ogre::ST_GENERIC, numThreads, "Hello Ogre-next SM");
 
-    //Set sane defaults for proper shadow mapping
-    gSceneManager->setShadowDirectionalLightExtrusionDistance(500.0f);
-    gSceneManager->setShadowFarDistance(500.0f);
-
-    Ogre::Camera *camera = gSceneManager->createCamera("Main Camera");
-    camera->setPosition(1000, 1000, 1000);
+    Ogre::Camera *camera = sceneManager->createCamera("Main Camera");
+    camera->setPosition(100, 100, 100);
     camera->lookAt(0, 0, 0);
     camera->setNearClipDistance(0.2f);
     camera->setFarClipDistance(1000.0f);
     camera->setAutoAspectRatio(true);
 
-
-    Ogre::CompositorManager2 *compositorManager = gOgreRoot->getCompositorManager2();
+    // The setup for a basic compositor with a blue clear colour
+    Ogre::CompositorManager2 *compositorManager = root->getCompositorManager2();
     const Ogre::String workspaceName("Demo Workspace");
     const Ogre::ColourValue backgroundColour(0.2f, 0.4f, 0.6f);
     compositorManager->createBasicWorkspaceDef(workspaceName, backgroundColour, Ogre::IdString());
-    auto *mWorkspace = compositorManager->addWorkspace(gSceneManager, gOgreWindow->getTexture(), camera, workspaceName,
-                                                       true);
-    gSceneManager = mWorkspace->getSceneManager();
+    compositorManager->addWorkspace(sceneManager, window->getTexture(), camera, workspaceName, true);
 
-    Ogre::Item *item = gSceneManager
-            ->createItem("ogrehead-2.mesh",
-                         Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME,
-                         Ogre::SCENE_DYNAMIC);
-    auto *mSceneNode = gSceneManager->getRootSceneNode(Ogre::SCENE_DYNAMIC)
-            ->createChildSceneNode(Ogre::SCENE_DYNAMIC);
-    mSceneNode->attachObject(item);
+//    Ogre::Item *item = sceneManager
+//            ->createItem("ogrehead-2.mesh",
+//                         Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME,
+//                         Ogre::SCENE_DYNAMIC);
+//    auto *mSceneNode = sceneManager->getRootSceneNode(Ogre::SCENE_DYNAMIC)
+//            ->createChildSceneNode(Ogre::SCENE_DYNAMIC);
+//    if (nullptr == mSceneNode)
+//        throw std::runtime_error("can't create new scene node");
+//    mSceneNode->attachObject(item);
 
-//    Ogre::Light *light = gSceneManager->createLight();
-//    Ogre::SceneNode *lightNode = gSceneManager->getRootSceneNode()->createChildSceneNode(Ogre::SCENE_DYNAMIC);
-//    lightNode->attachObject(light);
-//    light->setPowerScale(Ogre::Math::PI); //Since we don't do HDR, counter the PBS' division by PI
-//    light->setType(Ogre::Light::LT_DIRECTIONAL);
-//    light->setDirection(Ogre::Vector3(-1, -1, -1).normalisedCopy());
+    Ogre::Light *light = sceneManager->createLight();
+    Ogre::SceneNode *lightNode = sceneManager->getRootSceneNode(Ogre::SCENE_DYNAMIC)->createChildSceneNode(
+            Ogre::SCENE_DYNAMIC);
+    if (nullptr == lightNode)
+        throw std::runtime_error("can't create new light scene node");
+    lightNode->attachObject(light);
+    light->setPowerScale(Ogre::Math::PI); //Since we don't do HDR, counter the PBS' division by PI
+    light->setType(Ogre::Light::LT_DIRECTIONAL);
+    light->setDirection(Ogre::Vector3(-1, -1, -1).normalisedCopy());
+
+    //
 
     WindowEventListener gWindowEventListener;
-    Ogre::WindowEventUtilities::addWindowEventListener(gOgreWindow, &gWindowEventListener);
+    Ogre::WindowEventUtilities::addWindowEventListener(window, &gWindowEventListener);
 
     bool bQuit = false;
     while (!bQuit) {
@@ -140,14 +135,14 @@ int main(int argc, char **argv) {
 
         bQuit |= gWindowEventListener.shouldQuit();
 
-        if (gOgreWindow->isVisible() && !bQuit)
-            bQuit |= !gOgreRoot->renderOneFrame();
+        if (window->isVisible() && !bQuit)
+            bQuit |= !root->renderOneFrame();
     }
 
-    Ogre::WindowEventUtilities::removeWindowEventListener(gOgreWindow, &gWindowEventListener);
+    Ogre::WindowEventUtilities::removeWindowEventListener(window, &gWindowEventListener);
 
-    OGRE_DELETE gOgreRoot;
-    gOgreRoot = nullptr;
+    OGRE_DELETE root;
+    root = nullptr;
 
     return EXIT_SUCCESS;
 }

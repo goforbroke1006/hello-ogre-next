@@ -23,8 +23,7 @@ if (LINUX)
 endif (LINUX)
 
 find_package(OGRE 2.3.3 REQUIRED COMPONENTS Bites RTShaderSystem)
-#target_include_directories(${PROJECT_NAME} PRIVATE ${OGRE_INCLUDE_DIRS})
-message(OGRE_HlmsPbs_INCLUDE_DIRS = ${OGRE_HlmsPbs_INCLUDE_DIRS})
+
 target_include_directories(${PROJECT_NAME} PRIVATE
         ${OGRE_INCLUDE_DIRS}
         ${OGRE_INCLUDE_DIRS}/Hlms
@@ -33,12 +32,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
         ${OGRE_HlmsUnlit_INCLUDE_DIRS}
         "${OGRE_HlmsUnlit_INCLUDE_DIRS}/../Common"
 )
-#target_include_directories(${PROJECT_NAME} PRIVATE
-#        "${OGRE_INCLUDE_DIRS}"
-#        "${OGRE_HlmsPbs_INCLUDE_DIRS}"
-#        "${OGRE_HlmsUnlit_INCLUDE_DIRS}"
-#        "${OGRE_HlmsUnlit_INCLUDE_DIRS}/../Common")
-#target_link_libraries(${PROJECT_NAME} ${OGRE_LIBRARIES})
+
 target_link_libraries(${PROJECT_NAME}
         ${OGRE_LIBRARIES}
         ${OGRE_HlmsPbs_LIBRARIES}
@@ -46,6 +40,8 @@ target_link_libraries(${PROJECT_NAME}
 
 configure_file(${CMAKE_SOURCE_DIR}/third_party/ogre-next/build/Debug/bin/plugins_d.cfg ${CMAKE_CURRENT_BINARY_DIR}/plugins_d.cfg COPYONLY)
 configure_file(${CMAKE_SOURCE_DIR}/resources_d.cfg ${CMAKE_CURRENT_BINARY_DIR}/resources_d.cfg COPYONLY)
+configure_file(${CMAKE_SOURCE_DIR}/resources2.cfg ${CMAKE_CURRENT_BINARY_DIR}/resources2.cfg COPYONLY)
 
 file(COPY ./Media DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ./third_party/ogre-next/Samples/Media/Hlms DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Media)
+file(COPY ./third_party/ogre-next/Samples/Media/packs DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Media)
