@@ -4,10 +4,18 @@ project(hello-ogre-next)
 set(CMAKE_CXX_STANDARD 17)
 
 message(CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE})
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    message("Debug mode")
-    add_compile_definitions(OGRE_DEBUG_MODE)
-endif (CMAKE_BUILD_TYPE STREQUAL "Debug")
+#if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+#    message("Debug mode")
+#    add_compile_definitions(DEBUG)
+#endif (CMAKE_BUILD_TYPE STREQUAL "Debug")
+
+if( NOT MSVC )
+	set( CMAKE_CXX_FLAGS_DEBUG			"${CMAKE_CXX_FLAGS_DEBUG}			-DDEBUG=1 -D_DEBUG=1 -g"	)
+	set( CMAKE_CXX_FLAGS_MINSIZEREL		"${CMAKE_CXX_FLAGS_MINSIZEREL}		-Os -DNDEBUG"				)
+	set( CMAKE_CXX_FLAGS_RELEASE		"${CMAKE_CXX_FLAGS_RELEASE}			-O2 -DNDEBUG"				)
+	set( CMAKE_CXX_FLAGS_RELWITHDEBINFO	"${CMAKE_CXX_FLAGS_RELWITHDEBINFO}	-O2 -g"						)
+	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-overloaded-virtual" )
+endif()
 
 add_executable(${PROJECT_NAME} main.cpp
         WindowEventListener.h

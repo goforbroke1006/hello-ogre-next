@@ -23,16 +23,13 @@ int main(int argc, char **argv) {
 
     registerHlms();
 
-//    loadResources("resources2.cfg");
-    loadResources("resources_d.cfg");
-
     //const size_t numThreads = std::max<uint32_t>(1, Ogre::PlatformInformation::getNumLogicalCores());
     const size_t numThreads = 1u;
     auto *sceneManager = root->createSceneManager(Ogre::ST_GENERIC, numThreads, "Hello Ogre-next SM");
 
     Ogre::Camera *camera = sceneManager->createCamera("Main Camera");
-    camera->setPosition(100, 100, 100);
-    camera->lookAt(0, 0, 0);
+    camera->setPosition(Ogre::Vector3(100, 100, 100));
+    camera->lookAt(Ogre::Vector3(0, 0, 0));
     camera->setNearClipDistance(0.2f);
     camera->setFarClipDistance(1000.0f);
     camera->setAutoAspectRatio(true);
@@ -44,19 +41,23 @@ int main(int argc, char **argv) {
     compositorManager->createBasicWorkspaceDef(workspaceName, backgroundColour, Ogre::IdString());
     compositorManager->addWorkspace(sceneManager, window->getTexture(), camera, workspaceName, true);
 
-//    Ogre::Item *item = sceneManager
-//            ->createItem("ogrehead-2.mesh",
-//                         Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME,
-//                         Ogre::SCENE_DYNAMIC);
-//    auto *mSceneNode = sceneManager->getRootSceneNode(Ogre::SCENE_DYNAMIC)
-//            ->createChildSceneNode(Ogre::SCENE_DYNAMIC);
-//    if (nullptr == mSceneNode)
-//        throw std::runtime_error("can't create new scene node");
-//    mSceneNode->attachObject(item);
+    loadResources("resources2.cfg");
+//    loadResources("resources_d.cfg");
+
+
+
+    //
+
+    WindowEventListener gWindowEventListener;
+    Ogre::WindowEventUtilities::addWindowEventListener(window, &gWindowEventListener);
+
+    //
 
     Ogre::Light *light = sceneManager->createLight();
-    Ogre::SceneNode *lightNode = sceneManager
+    auto *lightNode = sceneManager
             ->getRootSceneNode(Ogre::SCENE_DYNAMIC)->createChildSceneNode(Ogre::SCENE_DYNAMIC);
+//    auto *lightNode = (Ogre::SceneNode *) sceneManager
+//            ->getRootSceneNode(Ogre::SCENE_DYNAMIC)->createChild(Ogre::SCENE_DYNAMIC);
     if (nullptr == lightNode)
         throw std::runtime_error("can't create new light scene node");
     lightNode->attachObject(light);
@@ -64,10 +65,19 @@ int main(int argc, char **argv) {
     light->setType(Ogre::Light::LT_DIRECTIONAL);
     light->setDirection(Ogre::Vector3(-1, -1, -1).normalisedCopy());
 
-    //
+    Ogre::Item *item = sceneManager
+            ->createItem("ogrehead-2.mesh",
+                         Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME,
+                         Ogre::SCENE_DYNAMIC);
+    auto *mSceneNode = sceneManager->getRootSceneNode(Ogre::SCENE_DYNAMIC)
+            ->createChildSceneNode(Ogre::SCENE_DYNAMIC);
+//    auto *mSceneNode = (Ogre::SceneNode *) sceneManager->getRootSceneNode(Ogre::SCENE_DYNAMIC)
+//            ->createChild(Ogre::SCENE_DYNAMIC);
+    if (nullptr == mSceneNode)
+        throw std::runtime_error("can't create new scene node");
+    mSceneNode->attachObject(item);
 
-    WindowEventListener gWindowEventListener;
-    Ogre::WindowEventUtilities::addWindowEventListener(window, &gWindowEventListener);
+    //
 
     bool bQuit = false;
     while (!bQuit) {
