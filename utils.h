@@ -13,6 +13,42 @@
 #include <OGRE/OgreMesh2.h>
 #include <OGRE/OgreItem.h>
 
+void loadResources(const std::string &filepath) {
+    // Loading resources
+    Ogre::ConfigFile cf;
+    cf.load(filepath);
+
+    Ogre::ConfigFile::SectionIterator it = cf.getSectionIterator();
+    Ogre::String section, type, arch;
+    while (it.hasMoreElements()) {
+        section = it.peekNextKey();
+        Ogre::ConfigFile::SettingsMultiMap *settings = it.getNext();
+        Ogre::ConfigFile::SettingsMultiMap::iterator i;
+        for (i = settings->begin(); i != settings->end(); ++i) {
+            type = i->first;
+            arch = i->second;
+            if (type == "DoNotUseAsResource")
+                continue;
+            Ogre::ResourceGroupManager::getSingleton().addResourceLocation(arch, type, section);
+        }
+    }
+
+
+//        auto &resourceGroupManager = Ogre::ResourceGroupManager::getSingleton();
+//        resourceGroupManager.addResourceLocation("./Media/Hlms/Common/Any", "FileSystem", "General");
+//        resourceGroupManager.addResourceLocation("./Media/Hlms/Common/GLSL", "FileSystem", "General");
+//        resourceGroupManager.addResourceLocation("./Media/Hlms/Common/HLSL", "FileSystem", "General");
+//        resourceGroupManager.addResourceLocation("./Media/Hlms/Common/Metal", "FileSystem", "General");
+//
+//        resourceGroupManager.addResourceLocation("./Media/models", "FileSystem", "Models");
+////        resourceGroupManager.addResourceLocation("./Media/materials/programs", "FileSystem", "Programs");
+//        resourceGroupManager.addResourceLocation("./Media/materials/scripts", "FileSystem", "Models");
+//        resourceGroupManager.addResourceLocation("./Media/materials/textures", "FileSystem", "Models");
+
+    // Initialise resources groups
+    Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups(true);
+}
+
 // V2 mesh loading
 Ogre::Item *ogreLoadMesh(Ogre::SceneManager *const sceneManager, const std::string &filepath) {
 //    Ogre::MeshPtr v2Mesh = Ogre::MeshManager::getSingleton().load(

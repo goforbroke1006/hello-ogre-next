@@ -3,76 +3,16 @@
 #include <Ogre.h>
 #include <OgreWindow.h>
 #include <Compositor/OgreCompositorManager2.h>
-#include <OgreMeshManager2.h>
 #include <OgreLight.h>
 #include <OgreMesh.h>
-#include <OGRE/OgreItem.h>
 #include <OgrePlatformInformation.h>
 #include <OGRE/Compositor/OgreCompositorWorkspace.h>
-#include <OGRE/Overlay/OgreOverlay.h>
-#include <OGRE/Overlay/OgreOverlaySystem.h>
-#include <OGRE/Overlay/OgreOverlayManager.h>
 
 #include "WindowEventListener.h"
-#include "Hlms.h"
 #include "utils.h"
-
-void loadResources(const std::string &filepath) {
-    // Loading resources
-    Ogre::ConfigFile cf;
-    cf.load(filepath);
-
-    Ogre::ConfigFile::SectionIterator it = cf.getSectionIterator();
-    Ogre::String section, type, arch;
-    while (it.hasMoreElements()) {
-        section = it.peekNextKey();
-        Ogre::ConfigFile::SettingsMultiMap *settings = it.getNext();
-        Ogre::ConfigFile::SettingsMultiMap::iterator i;
-        for (i = settings->begin(); i != settings->end(); ++i) {
-            type = i->first;
-            arch = i->second;
-            if (type == "DoNotUseAsResource")
-                continue;
-            Ogre::ResourceGroupManager::getSingleton().addResourceLocation(arch, type, section);
-        }
-    }
-
-
-//        auto &resourceGroupManager = Ogre::ResourceGroupManager::getSingleton();
-//        resourceGroupManager.addResourceLocation("./Media/Hlms/Common/Any", "FileSystem", "General");
-//        resourceGroupManager.addResourceLocation("./Media/Hlms/Common/GLSL", "FileSystem", "General");
-//        resourceGroupManager.addResourceLocation("./Media/Hlms/Common/HLSL", "FileSystem", "General");
-//        resourceGroupManager.addResourceLocation("./Media/Hlms/Common/Metal", "FileSystem", "General");
-//
-//        resourceGroupManager.addResourceLocation("./Media/models", "FileSystem", "Models");
-////        resourceGroupManager.addResourceLocation("./Media/materials/programs", "FileSystem", "Programs");
-//        resourceGroupManager.addResourceLocation("./Media/materials/scripts", "FileSystem", "Models");
-//        resourceGroupManager.addResourceLocation("./Media/materials/textures", "FileSystem", "Models");
-
-    // Initialise resources groups
-    Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups(true);
-}
-
-#if OGRE_PLATFORM != OGRE_PLATFORM_WIN32 && OGRE_PLATFORM != OGRE_PLATFORM_LINUX
-int main(int argc, char **argv) {
-    std::cerr << "Unsupported platform: " << OGRE_PLATFORM << std::endl;
-    return EXIT_FAILURE;
-}
-#endif
-
-#if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
-
-#define WIN32_LEAN_AND_MEAN
-#include "windows.h"
-INT WINAPI WinMain( HINSTANCE hInst, HINSTANCE, LPSTR strCmdLine, INT ) {
-
-#else
+#include "Hlms.h"
 
 int main(int argc, char **argv) {
-
-#endif
-
-#if OGRE_PLATFORM == OGRE_PLATFORM_WIN32 || OGRE_PLATFORM == OGRE_PLATFORM_LINUX
     auto *root = OGRE_NEW Ogre::Root("plugins_d.cfg", "ogre.cfg", "Ogre.log");
 
     if (!root->restoreConfig() && !root->showConfigDialog())
@@ -115,8 +55,8 @@ int main(int argc, char **argv) {
 //    mSceneNode->attachObject(item);
 
     Ogre::Light *light = sceneManager->createLight();
-    Ogre::SceneNode *lightNode = sceneManager->getRootSceneNode(Ogre::SCENE_DYNAMIC)->createChildSceneNode(
-            Ogre::SCENE_DYNAMIC);
+    Ogre::SceneNode *lightNode = sceneManager
+            ->getRootSceneNode(Ogre::SCENE_DYNAMIC)->createChildSceneNode(Ogre::SCENE_DYNAMIC);
     if (nullptr == lightNode)
         throw std::runtime_error("can't create new light scene node");
     lightNode->attachObject(light);
@@ -146,5 +86,3 @@ int main(int argc, char **argv) {
 
     return EXIT_SUCCESS;
 }
-
-#endif
