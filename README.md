@@ -1,6 +1,20 @@
 # Hello Ogre-next
 
+Small hello-world application on [Ogre-next](https://github.com/OGRECave/ogre-next) version 2.3.3
+
+![result.png](result.png)
+
 ### Setup
+
+Requirements:
+
+* Ubuntu 22
+
+Setup script will install:
+
+* Cmake
+* Ninja
+* Clang 17
 
 ```shell
 bash ./setup.sh
