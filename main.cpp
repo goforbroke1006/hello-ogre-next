@@ -21,7 +21,7 @@ int main(int argc, char **argv) {
     root->getRenderSystem()->setConfigOption("sRGB Gamma Conversion", "Yes");
     auto *window = root->initialise(true, "Hello Ogre-next");
 
-    registerHlms();
+    registerHlms("resources2.cfg");
 
     //const size_t numThreads = std::max<uint32_t>(1, Ogre::PlatformInformation::getNumLogicalCores());
     const size_t numThreads = 1u;
@@ -42,11 +42,6 @@ int main(int argc, char **argv) {
     compositorManager->addWorkspace(sceneManager, window->getTexture(), camera, workspaceName, true);
 
     loadResources("resources2.cfg");
-//    loadResources("resources_d.cfg");
-
-
-
-    //
 
     WindowEventListener gWindowEventListener;
     Ogre::WindowEventUtilities::addWindowEventListener(window, &gWindowEventListener);
@@ -56,10 +51,6 @@ int main(int argc, char **argv) {
     Ogre::Light *light = sceneManager->createLight();
     auto *lightNode = sceneManager
             ->getRootSceneNode(Ogre::SCENE_DYNAMIC)->createChildSceneNode(Ogre::SCENE_DYNAMIC);
-//    auto *lightNode = (Ogre::SceneNode *) sceneManager
-//            ->getRootSceneNode(Ogre::SCENE_DYNAMIC)->createChild(Ogre::SCENE_DYNAMIC);
-    if (nullptr == lightNode)
-        throw std::runtime_error("can't create new light scene node");
     lightNode->attachObject(light);
     light->setPowerScale(Ogre::Math::PI); //Since we don't do HDR, counter the PBS' division by PI
     light->setType(Ogre::Light::LT_DIRECTIONAL);
@@ -71,10 +62,6 @@ int main(int argc, char **argv) {
                          Ogre::SCENE_DYNAMIC);
     auto *mSceneNode = sceneManager->getRootSceneNode(Ogre::SCENE_DYNAMIC)
             ->createChildSceneNode(Ogre::SCENE_DYNAMIC);
-//    auto *mSceneNode = (Ogre::SceneNode *) sceneManager->getRootSceneNode(Ogre::SCENE_DYNAMIC)
-//            ->createChild(Ogre::SCENE_DYNAMIC);
-    if (nullptr == mSceneNode)
-        throw std::runtime_error("can't create new scene node");
     mSceneNode->attachObject(item);
 
     //

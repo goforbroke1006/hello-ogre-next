@@ -5,9 +5,9 @@
 #ifndef HELLO_OGRE_NEXT_HLMS_H
 #define HELLO_OGRE_NEXT_HLMS_H
 
-#include <OgreConfigFile.h>
-#include <OgreArchiveManager.h>
-#include <OgreHlmsManager.h>
+#include <OGRE/OgreConfigFile.h>
+#include <OGRE/OgreArchiveManager.h>
+#include <OGRE/OgreHlmsManager.h>
 #include <OGRE/Hlms/Pbs/OgreHlmsPbs.h>
 #include <OGRE/Hlms/Unlit/OgreHlmsUnlit.h>
 
@@ -46,15 +46,12 @@ T *CreateHlms(const Ogre::String &rootFolder) {
     return hlms;
 }
 
-void registerHlms(void) {
+void registerHlms(const std::string &filepath) {
     using namespace Ogre;
 
-//    String resourcePath = "data/";
-    String resourcePath = "";
     ConfigFile cf;
-    cf.load("resources_d.cfg");
-    String rootHlmsFolder =
-            resourcePath + cf.getSetting("DoNotUseAsResource", "Hlms", "");
+    cf.load(filepath);
+    String rootHlmsFolder = cf.getSetting("DoNotUseAsResource", "Hlms", "");
     if (rootHlmsFolder.empty())
         rootHlmsFolder = "./";
     else if (*(rootHlmsFolder.end() - 1) != '/')

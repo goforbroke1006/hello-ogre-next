@@ -4,10 +4,6 @@ project(hello-ogre-next)
 set(CMAKE_CXX_STANDARD 17)
 
 message(CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE})
-#if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-#    message("Debug mode")
-#    add_compile_definitions(DEBUG)
-#endif (CMAKE_BUILD_TYPE STREQUAL "Debug")
 
 if( NOT MSVC )
 	set( CMAKE_CXX_FLAGS_DEBUG			"${CMAKE_CXX_FLAGS_DEBUG}			-DDEBUG=1 -D_DEBUG=1 -g"	)
@@ -47,7 +43,6 @@ target_link_libraries(${PROJECT_NAME}
         ${OGRE_HlmsUnlit_LIBRARIES})
 
 configure_file(${CMAKE_SOURCE_DIR}/third_party/ogre-next/build/Debug/bin/plugins_d.cfg ${CMAKE_CURRENT_BINARY_DIR}/plugins_d.cfg COPYONLY)
-configure_file(${CMAKE_SOURCE_DIR}/resources_d.cfg ${CMAKE_CURRENT_BINARY_DIR}/resources_d.cfg COPYONLY)
 configure_file(${CMAKE_SOURCE_DIR}/resources2.cfg ${CMAKE_CURRENT_BINARY_DIR}/resources2.cfg COPYONLY)
 
 file(COPY ./Media DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
